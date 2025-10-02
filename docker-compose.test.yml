@@ -1,0 +1,41 @@
+services:
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    container_name: online-store-tests
+    environment:
+      - DATABASE_URL=postgresql://test_user:test_password@test-db:5432/test_db
+      - SECRET_KEY=test-secret-key-for-testing-only-1234567890
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+    depends_on:
+      test-db:
+        condition: service_healthy
+    volumes:
+      - ./reports:/app/reports
+    command: >
+      sh -c "echo 'Waiting for database...' &&
+             sleep 10 &&
+             python -c 'import sys; print(\"Python path:\", sys.path)' &&
+             pytest --cov=app --cov-report=html --cov-report=xml --junitxml=reports/junit.xml -v"
+
+  test-db:
+    image: postgres:13-alpine
+    container_name: test-db
+    environment:
+      - POSTGRES_USER=test_user
+      - POSTGRES_PASSWORD=test_password
+      - POSTGRES_DB=test_db
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user -d test_db"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    volumes:
+      - test_db_data:/var/lib/postgresql/data
+
+volumes:
+  test_db_data:
