@@ -6,7 +6,13 @@ from app.schemas.auth import UserCreate
 def create_admin_user():
     db = SessionLocal()
     try:
-        # Сильный пароль для администратора
+        # Проверяем, существует ли уже администратор
+        existing_admin = UserService.get_user_by_username(db, "admin")
+        if existing_admin:
+            print(f" Admin user already exists (ID: {existing_admin.id})")
+            return existing_admin
+
+        # Создаем администратора
         admin_data = UserCreate(
             email="admin@example.com",
             username="admin",
@@ -15,26 +21,16 @@ def create_admin_user():
             password="AdminSecurePass123!"
         )
 
-        # Проверяем, существует ли уже администратор
-        existing_admin = UserService.get_user_by_username(db, "admin")
-        if existing_admin:
-            print("Admin user already exists")
-            return
-
-        # Создаем администратора
         admin_user = UserService.create_user(db=db, user=admin_data)
-
-        # Устанавливаем флаг суперпользователя
         admin_user.is_superuser = True
         db.commit()
 
-        print("Admin user created successfully")
-        print(f"Username: admin")
-        print(f"Password: AdminSecurePass123!")
-        print("Please change the password after first login!")
+        print(f" Admin user created successfully (ID: {admin_user.id})")
+        return admin_user
 
     except Exception as e:
-        print(f"Error creating admin user: {e}")
+        print(f" Error creating admin user: {e}")
+        db.rollback()
     finally:
         db.close()
 
