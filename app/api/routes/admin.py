@@ -132,21 +132,6 @@ def get_promotion_stats(
         raise HTTPException(status_code=404, detail="Promotion not found")
     return stats
 
-
-@router.post("/apply", response_model=ApplyPromoResponse)
-def apply_promotion(
-        request: ApplyPromoRequest,
-        current_user: User = Depends(get_current_user),
-        db: Session = Depends(get_db)
-):
-    """Применение промо-кода - только для авторизованных пользователей"""
-    return PromotionService.apply_promotion(
-        db=db,
-        request=request,
-        user_id=current_user.id
-    )
-
-
 @router.get("/user/usage", response_model=List[PromotionUsage])
 def get_user_promotion_usage(
         current_user: User = Depends(get_current_user),
@@ -171,5 +156,6 @@ def import_csv_data(db: Session = Depends(get_db)):
         return {"message": "Данные успешно импортированы из CSV файла"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка импорта: {str(e)}")
+
 
 
