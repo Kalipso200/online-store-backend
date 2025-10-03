@@ -1,6 +1,7 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 from datetime import datetime
+from pydantic.functional_validators import field_validator
 import re
 
 
@@ -10,16 +11,18 @@ class UserBase(BaseModel):
     first_name: str
     last_name: str
 
-    @validator('email')
-    def validate_email(cls, v):
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: str) -> str:
         if not v or '@' not in v:
             raise ValueError('Invalid email format')
         if len(v) > 100:
             raise ValueError('Email is too long')
         return v.strip().lower()
 
-    @validator('username')
-    def validate_username(cls, v):
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('Username cannot be empty')
         if len(v) < 3:
@@ -32,16 +35,18 @@ class UserBase(BaseModel):
             raise ValueError('Username can only contain letters, numbers and underscores')
         return v.strip()
 
-    @validator('first_name')
-    def validate_first_name(cls, v):
+    @field_validator('first_name')
+    @classmethod
+    def validate_first_name(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('First name cannot be empty')
         if len(v) > 50:
             raise ValueError('First name is too long')
         return v.strip()
 
-    @validator('last_name')
-    def validate_last_name(cls, v):
+    @field_validator('last_name')
+    @classmethod
+    def validate_last_name(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('Last name cannot be empty')
         if len(v) > 50:
@@ -52,8 +57,9 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     password: str
 
-    @validator('password')
-    def validate_password(cls, v):
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('Password cannot be empty')
         if len(v) < 12:
@@ -86,17 +92,20 @@ class UserUpdate(BaseModel):
     last_name: Optional[str] = None
     password: Optional[str] = None
 
-    @validator('email')
-    def validate_email(cls, v):
+    @field_validator('email')
+    @classmethod
+    def validate_email(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
             if '@' not in v:
                 raise ValueError('Invalid email format')
             if len(v) > 100:
                 raise ValueError('Email is too long')
-        return v.strip().lower() if v else v
+            return v.strip().lower()
+        return v
 
-    @validator('username')
-    def validate_username(cls, v):
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
             if len(v.strip()) == 0:
                 raise ValueError('Username cannot be empty')
@@ -108,22 +117,30 @@ class UserUpdate(BaseModel):
                 raise ValueError('Username cannot contain spaces')
             if not re.match(r'^[a-zA-Z0-9_]+$', v):
                 raise ValueError('Username can only contain letters, numbers and underscores')
-        return v.strip() if v else v
+            return v.strip()
+        return v
 
-    @validator('first_name')
-    def validate_first_name(cls, v):
-        if v is not None and len(v.strip()) == 0:
-            raise ValueError('First name cannot be empty')
-        return v.strip() if v else v
+    @field_validator('first_name')
+    @classmethod
+    def validate_first_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            if len(v.strip()) == 0:
+                raise ValueError('First name cannot be empty')
+            return v.strip()
+        return v
 
-    @validator('last_name')
-    def validate_last_name(cls, v):
-        if v is not None and len(v.strip()) == 0:
-            raise ValueError('Last name cannot be empty')
-        return v.strip() if v else v
+    @field_validator('last_name')
+    @classmethod
+    def validate_last_name(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            if len(v.strip()) == 0:
+                raise ValueError('Last name cannot be empty')
+            return v.strip()
+        return v
 
-    @validator('password')
-    def validate_password(cls, v):
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
             if len(v.strip()) == 0:
                 raise ValueError('Password cannot be empty')
@@ -155,8 +172,7 @@ class User(UserBase):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserInDB(User):
@@ -184,14 +200,16 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
-    @validator('username')
-    def validate_username(cls, v):
+    @field_validator('username')
+    @classmethod
+    def validate_username(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('Username cannot be empty')
         return v.strip()
 
-    @validator('password')
-    def validate_password(cls, v):
+    @field_validator('password')
+    @classmethod
+    def validate_password(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('Password cannot be empty')
         return v
@@ -205,14 +223,16 @@ class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password: str
 
-    @validator('current_password')
-    def validate_current_password(cls, v):
+    @field_validator('current_password')
+    @classmethod
+    def validate_current_password(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('Current password cannot be empty')
         return v
 
-    @validator('new_password')
-    def validate_new_password(cls, v):
+    @field_validator('new_password')
+    @classmethod
+    def validate_new_password(cls, v: str) -> str:
         if not v or len(v.strip()) == 0:
             raise ValueError('New password cannot be empty')
         if len(v) < 12:
