@@ -16,7 +16,6 @@ TEST_DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://test_user:test_passw
 
 @pytest.fixture(scope="function")
 def db_session():
-    # ✅ ПРАВИЛЬНО для PostgreSQL - убираем SQLite-специфичные параметры
     engine = create_engine(TEST_DATABASE_URL)
 
     # Создаем таблицы
@@ -153,4 +152,5 @@ def admin_token(admin_user):
 @pytest.fixture
 def admin_headers(admin_token):
     """Создает заголовки авторизации для администратора"""
+
     return {"Authorization": f"Bearer {admin_token}"}
