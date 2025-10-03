@@ -75,7 +75,8 @@ def refresh_token(
         )
 
     user_id = payload.get("sub")
-    user = UserService.get_user_by_id(db, user_id=int(user_id))
+    from app.models.models import User
+    user = db.query(User).filter(User.id == int(user_id)).first()
     if not user or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

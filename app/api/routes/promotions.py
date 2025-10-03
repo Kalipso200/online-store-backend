@@ -29,9 +29,6 @@ def get_active_promotions(
             is_active=True
         )
 
-        print(f"🔍 Найдено промо-акций: {len(promotions)}")
-
-        # Преобразуем SQLAlchemy модели в Pydantic схемы
         result = []
         for promo in promotions:
             try:
@@ -58,21 +55,20 @@ def get_active_promotions(
                     "created_by": promo.created_by
                 }
 
-                # Создаем Pydantic объект
                 promotion_schema = Promotion(**promo_data)
                 result.append(promotion_schema)
 
             except Exception as e:
-                print(f"❌ Ошибка преобразования промо-акции {promo.id}: {e}")
+                print(f" Ошибка преобразования промо-акции {promo.id}: {e}")
                 continue
 
         print(f"✅ Успешно преобразовано: {len(result)} промо-акций")
         return result
 
     except Exception as e:
-        print(f"❌ Критическая ошибка в эндпоинте: {e}")
+        print(f" Критическая ошибка в эндпоинте: {e}")
         import traceback
-        print(f"❌ Трассировка: {traceback.format_exc()}")
+        print(f" Трассировка: {traceback.format_exc()}")
         raise HTTPException(
             status_code=500,
             detail=f"Internal server error: {str(e)}"

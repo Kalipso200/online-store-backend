@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 
@@ -15,8 +15,7 @@ class CategoryCreate(CategoryBase):
 class Category(CategoryBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 # Product Schemas
@@ -41,8 +40,7 @@ class ProductUpdate(BaseModel):
 class Product(ProductBase):
     id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ProductWithCategory(Product):
@@ -68,8 +66,7 @@ class Review(ReviewBase):
     user_id: int
     created_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ReviewWithUser(Review):
@@ -96,8 +93,7 @@ class Cart(CartBase):
     id: int
     user_id: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class CartWithProduct(Cart):

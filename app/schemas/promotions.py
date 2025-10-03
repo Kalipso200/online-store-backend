@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 from enum import Enum
@@ -106,8 +106,7 @@ class Promotion(PromotionBase):
     created_at: datetime
     created_by: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class PromotionWithUsage(Promotion):
@@ -130,8 +129,7 @@ class PromotionUsage(PromotionUsageBase):
     id: int
     used_at: datetime
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ApplyPromoRequest(BaseModel):
